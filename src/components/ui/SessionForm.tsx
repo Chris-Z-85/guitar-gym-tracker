@@ -42,7 +42,7 @@ export function SessionForm() {
   }
 
   return (
-  <Card className="max-w-xl p-4 mx-auto mt-6 space-y-4 shadow-sm">
+  <Card className="max-w-xl p-4 mx-auto mt-6 space-y-4 shadow-xs">
       <CardContent className="space-y-4">
         <h2 className="text-xl font-bold">Log Guitar Practice Session</h2>
         <Input placeholder="Exercise name" name="name" value={current.name} onChange={handleChange} />
