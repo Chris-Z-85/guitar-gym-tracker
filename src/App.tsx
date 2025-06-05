@@ -1,8 +1,10 @@
 import { FC } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { SessionForm } from "./components/ui/SessionForm"
+import SessionForm from "./components/ui/SessionForm"
+import SessionHistory from "./components/ui/SessionHistory";
 
 const App: FC = () => {
+  
   return (
     <div className="min-h-screen bg-background">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -18,6 +20,7 @@ const App: FC = () => {
         Track your daily guitar practice sessions, add exercises, and monitor your progress over time.
       </p>
           <SessionForm />
+          <SessionHistory />
         </div>
       </div>
     </div>

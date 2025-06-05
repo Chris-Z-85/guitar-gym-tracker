@@ -1,74 +1,104 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from "@/components/supabaseClient.ts";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+interface PracticeExercise {
+  name: string;
+  bpm: number;
+  duration: number;
+  notes?: string;
+}
 
 interface Session {
-  id: string;
-  title: string;
-  createdAt: string;
+  id: number;
+  date: string;
+  exercises: PracticeExercise[];
 }
 
 const SessionHistory: React.FC = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editedTitle, setEditedTitle] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load sessions from localStorage on component mount
+  // Load sessions from Supabase on component mount
   useEffect(() => {
-    const storedSessions = localStorage.getItem('sessions');
-    if (storedSessions) {
-      setSessions(JSON.parse(storedSessions));
-    }
+    fetchSessions();
   }, []);
 
-  // Save sessions to localStorage whenever sessions state changes
-  useEffect(() => {
-    localStorage.setItem('sessions', JSON.stringify(sessions));
-  }, [sessions]);
+  const fetchSessions = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('practice_sessions')
+        .select('*')
+        .order('date', { ascending: false });
 
-  const handleEdit = (id: string, currentTitle: string) => {
-    setEditingId(id);
-    setEditedTitle(currentTitle);
+      if (error) throw error;
+      setSessions(data || []);
+    } catch (err) {
+      console.error('Error fetching sessions:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSave = (id: string) => {
-    setSessions(prevSessions =>
-      prevSessions.map(session =>
-        session.id === id ? { ...session, title: editedTitle } : session
-      )
-    );
-    setEditingId(null);
-    setEditedTitle('');
+  const handleDelete = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('practice_sessions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setSessions(prevSessions => prevSessions.filter(session => session.id !== id));
+    } catch (err) {
+      console.error('Error deleting session:', err);
+      alert('Failed to delete session. Please try again.');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setSessions(prevSessions => prevSessions.filter(session => session.id !== id));
-  };
+  if (loading) return <div>Loading sessions...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
-      <h2>Session History</h2>
-      <ul>
-        {sessions.map(session => (
-          <li key={session.id}>
-            {editingId === session.id ? (
-              <>
-                <input
-                  type="text"
-                  value={editedTitle}
-                  onChange={e => setEditedTitle(e.target.value)}
-                />
-                <button onClick={() => handleSave(session.id)}>Save</button>
-              </>
-            ) : (
-              <>
-                <span>{session.title}</span>
-                <button onClick={() => handleEdit(session.id, session.title)}>Edit</button>
-              </>
-            )}
-            <button onClick={() => handleDelete(session.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Card className="max-w-xl p-4 mx-auto mt-6">
+      <CardContent>
+        <h2 className="mb-4 text-xl font-bold">Session History</h2>
+        {sessions.length === 0 ? (
+          <p>No practice sessions recorded yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {sessions.map(session => (
+              <Card key={session.id} className="p-4">
+                <h3 className="font-semibold">
+                  {new Date(session.date).toLocaleDateString()}
+                </h3>
+                <ul className="mt-2 space-y-2">
+                  {session.exercises.map((exercise, idx) => (
+                    <li key={idx} className="text-sm">
+                      {exercise.name} — {exercise.bpm} BPM — {exercise.duration} min
+                      {exercise.notes && (
+                        <p className="mt-1 text-gray-500">Notes: {exercise.notes}</p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDelete(session.id)}
+                  className="mt-2"
+                >
+                  Delete Session
+                </Button>
+              </Card>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
