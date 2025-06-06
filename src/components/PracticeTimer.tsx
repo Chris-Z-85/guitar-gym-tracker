@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Volume2, VolumeX, Play, Pause } from "lucide-react";
+import { toast } from "sonner";
 
 const FOCUS_TIME = 25 * 60; // 25 minutes
 const BREAK_TIME = 5 * 60;  // 5 minutes
@@ -69,6 +70,11 @@ export default function PracticeTimer() {
             });
           }
         }
+        toast(
+          pomodoroPhase === 'focus'
+            ? "🎉 Focus session complete! Time for a break."
+            : "✅ Break over. Back to focus."
+        );
         setTime(0);
         setPomodoroPhase(pomodoroPhase === 'focus' ? 'break' : 'focus');
       }

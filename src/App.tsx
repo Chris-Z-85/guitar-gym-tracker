@@ -3,6 +3,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import SessionForm from "./components/ui/SessionForm"
 import SessionHistory from "./components/ui/SessionHistory";
 import PracticeTimer from "./components/PracticeTimer";
+import { Toaster } from "sonner";
 
 const App: FC = () => {
   
@@ -23,6 +24,7 @@ const App: FC = () => {
           <PracticeTimer />
           <SessionForm />
           <SessionHistory />
+          <Toaster />
         </div>
       </div>
     </div>
