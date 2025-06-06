@@ -2,6 +2,7 @@ import { FC } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import SessionForm from "./components/ui/SessionForm"
 import SessionHistory from "./components/ui/SessionHistory";
+import PracticeTimer from "./components/PracticeTimer";
 
 const App: FC = () => {
   
@@ -19,6 +20,7 @@ const App: FC = () => {
           <p className="font-bold">
         Track your daily guitar practice sessions, add exercises, and monitor your progress over time.
       </p>
+          <PracticeTimer />
           <SessionForm />
           <SessionHistory />
         </div>
