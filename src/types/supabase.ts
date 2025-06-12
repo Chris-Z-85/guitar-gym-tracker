@@ -1,39 +1,61 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export interface Database {
   public: {
     Tables: {
-      practice_sessions: {
+      practice_items: {
         Row: {
-          id: number
+          id: string
           created_at: string
-          date: string
-          exercises: {
-            name: string
-            bpm: number
-            duration: number
-            notes?: string
-          }[]
+          name: string
+          user_id: string
         }
         Insert: {
-          id?: number
+          id?: string
           created_at?: string
-          date: string
-          exercises: {
-            name: string
-            bpm: number
-            duration: number
-            notes?: string
-          }[]
+          name: string
+          user_id: string
         }
         Update: {
-          id?: number
+          id?: string
           created_at?: string
-          date?: string
-          exercises?: {
-            name: string
-            bpm: number
-            duration: number
-            notes?: string
-          }[]
+          name?: string
+          user_id?: string
+        }
+      }
+      practice_sessions: {
+        Row: {
+          id: string
+          created_at: string
+          duration: number
+          name: string
+          notes: string | null
+          target_bpm: number
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          duration: number
+          name: string
+          notes?: string | null
+          target_bpm: number
+          user_id: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          duration?: number
+          name?: string
+          notes?: string | null
+          target_bpm?: number
+          user_id?: string
         }
       }
     }
@@ -44,6 +66,9 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
       [_ in never]: never
     }
   }

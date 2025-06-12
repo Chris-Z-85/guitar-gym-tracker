@@ -5,48 +5,63 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { Plus, X } from "lucide-react";
 import { toast } from "sonner";
-
-// Define the key for localStorage
-const PRACTICE_ITEMS_KEY = 'guitar-gym-practice-items';
-
-export interface PracticeItem {
-  id: string;
-  name: string;
-}
+import { useAuth } from '@/lib/context/AuthProvider';
+import { PracticeItem, fetchPracticeItems, addPracticeItem, deletePracticeItem } from '@/lib/practice-items';
 
 export function Settings() {
+  const { user } = useAuth();
   const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([]);
   const [newItem, setNewItem] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Load practice items from localStorage on component mount
   useEffect(() => {
-    const savedItems = localStorage.getItem(PRACTICE_ITEMS_KEY);
-    if (savedItems) {
-      setPracticeItems(JSON.parse(savedItems));
-    }
-  }, []);
-
-  // Save practice items to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem(PRACTICE_ITEMS_KEY, JSON.stringify(practiceItems));
-  }, [practiceItems]);
-
-  const handleAddItem = () => {
-    if (!newItem.trim()) return;
+    if (!user) return;
     
-    const item: PracticeItem = {
-      id: Date.now().toString(),
-      name: newItem.trim()
+    const loadPracticeItems = async () => {
+      try {
+        const items = await fetchPracticeItems(user.id);
+        setPracticeItems(items);
+      } catch (error) {
+        toast.error("Failed to load practice items");
+        console.error(error);
+      }
     };
 
-    setPracticeItems(prev => [...prev, item]);
-    setNewItem("");
-    toast.success("Practice item added!");
+    loadPracticeItems();
+  }, [user]);
+
+  const handleAddItem = async () => {
+    if (!user || !newItem.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      const item = await addPracticeItem({
+        name: newItem.trim(),
+        user_id: user.id
+      });
+      setPracticeItems(prev => [...prev, item]);
+      setNewItem("");
+      toast.success("Practice item added!");
+    } catch (error) {
+      toast.error("Failed to add practice item");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRemoveItem = (id: string) => {
-    setPracticeItems(prev => prev.filter(item => item.id !== id));
-    toast.success("Practice item removed!");
+  const handleRemoveItem = async (id: string) => {
+    setIsLoading(true);
+    try {
+      await deletePracticeItem(id);
+      setPracticeItems(prev => prev.filter(item => item.id !== id));
+      toast.success("Practice item removed!");
+    } catch (error) {
+      toast.error("Failed to remove practice item");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -72,10 +87,11 @@ export function Settings() {
                 onChange={(e) => setNewItem(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="e.g., Scales, Chords, Song Name..."
+                disabled={isLoading}
               />
               <Button 
                 onClick={handleAddItem}
-                disabled={!newItem.trim()}
+                disabled={!newItem.trim() || isLoading}
               >
                 <Plus className="w-4 h-4" />
               </Button>
@@ -96,6 +112,7 @@ export function Settings() {
                     size="sm"
                     className="w-4 h-4 p-0 hover:bg-transparent"
                     onClick={() => handleRemoveItem(item.id)}
+                    disabled={isLoading}
                   >
                     <X className="w-3 h-3" />
                   </Button>

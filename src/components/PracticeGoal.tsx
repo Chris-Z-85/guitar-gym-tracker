@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@radix-ui/react-label"
 import { Textarea } from "./ui/textarea"
-import { PracticeItem } from "./Settings"
+import { useUser } from "@/lib/hooks/useUser"
+import { PracticeItem, fetchPracticeItems } from "@/lib/practice-items"
+import { toast } from "sonner"
 
 export interface PracticeGoal {
   name: string
@@ -17,19 +19,33 @@ interface PracticeGoalFormProps {
 }
 
 export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
+  const { user } = useUser();
   const [goal, setGoal] = useState<PracticeGoal>({
     name: "",
     targetBpm: 120,
     notes: "",
   })
   const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    const savedItems = localStorage.getItem('guitar-gym-practice-items')
-    if (savedItems) {
-      setPracticeItems(JSON.parse(savedItems))
-    }
-  }, [])
+    if (!user) return;
+
+    const loadPracticeItems = async () => {
+      setIsLoading(true);
+      try {
+        const items = await fetchPracticeItems(user.id);
+        setPracticeItems(items);
+      } catch (error) {
+        toast.error("Failed to load practice items");
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPracticeItems();
+  }, [user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +67,7 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
                   variant="outline" 
                   size="sm"
                   onClick={() => setGoal(prev => ({ ...prev, name: item.name }))}
+                  disabled={isLoading}
                 >
                   {item.name}
                 </Button>
