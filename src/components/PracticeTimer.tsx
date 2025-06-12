@@ -2,25 +2,23 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Volume2, VolumeX, Play, Pause } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
+import { PracticeGoal, PracticeGoalForm } from './PracticeGoal';
+import { supabase } from "@/components/supabaseClient.ts";
+import { Timer } from './Timer';
 
-const FOCUS_TIME = 25 * 60; // 25 minutes
-const BREAK_TIME = 5 * 60;  // 5 minutes
+interface PracticeTimerProps {
+  initialGoal?: PracticeGoal;
+}
 
-type Mode = 'stopwatch' | 'pomodoro';
-type PomodoroPhase = 'focus' | 'break';
-
-export default function PracticeTimer() {
-  const [mode, setMode] = useState<Mode>('pomodoro');
-  const [time, setTime] = useState(0);
-  const [running, setRunning] = useState(false);
-  const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>('focus');
-  const [volume, setVolume] = useState(1); // 0 to 1
+export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
+  const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
+  const [currentGoal, setCurrentGoal] = useState<PracticeGoal | null>(initialGoal || null);
+  const [practiceTime, setPracticeTime] = useState(0);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -49,85 +47,67 @@ export default function PracticeTimer() {
     }
   }, [volume, muted]);
 
-  useEffect(() => {
-    if (running) {
-      timerRef.current = setInterval(() => {
-        setTime((prev) => prev + 1);
-      }, 1000);
-    }
-    return () => clearInterval(timerRef.current!);
-  }, [running]);
+  const handleGoalSet = async (goal: PracticeGoal) => {
+    setCurrentGoal(goal);
+    setPracticeTime(0);
+  };
 
-  useEffect(() => {
-    if (mode === 'pomodoro') {
-      const limit = pomodoroPhase === 'focus' ? FOCUS_TIME : BREAK_TIME;
-      if (time >= limit) {
-        if (audioRef.current) {
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(error => {
-              console.error('Audio playback failed:', error);
-            });
-          }
-        }
-        toast(
-          pomodoroPhase === 'focus'
-            ? "🎉 Focus session complete! Time for a break."
-            : "✅ Break over. Back to focus."
-        );
-        setTime(0);
-        setPomodoroPhase(pomodoroPhase === 'focus' ? 'break' : 'focus');
+  const handleFinishSession = async () => {
+    if (!currentGoal) return;
+
+    try {
+      // Only save if there's actual practice time
+      if (practiceTime === 0) {
+        toast.error("Practice duration must be greater than 0 seconds");
+        return;
       }
+
+      const session = {
+        date: new Date().toISOString(),
+        exercises: [{
+          name: currentGoal.name,
+          bpm: currentGoal.targetBpm,
+          duration: practiceTime,
+          notes: currentGoal.notes
+        }]
+      };
+
+      const { error } = await supabase
+        .from('practice_sessions')
+        .insert([session]);
+
+      if (error) throw error;
+
+      toast.success("Practice session saved!");
+      setCurrentGoal(null);
+      setPracticeTime(0);
+    } catch (error) {
+      console.error('Error saving session:', error);
+      toast.error("Failed to save session");
     }
-  }, [time, mode, pomodoroPhase]);
-
-  const handleReset = () => {
-    setTime(0);
-    setRunning(false);
   };
 
-  const formatTime = (t: number) => {
-    const min = String(Math.floor(t / 60)).padStart(2, '0');
-    const sec = String(t % 60).padStart(2, '0');
-    return `${min}:${sec}`;
-  };
-
-  const displayTime =
-    mode === 'pomodoro'
-      ? (pomodoroPhase === 'focus' ? FOCUS_TIME - time : BREAK_TIME - time)
-      : time;
+  if (!currentGoal) {
+    return <PracticeGoalForm onGoalSet={handleGoalSet} />;
+  }
 
   return (
     <Card className="max-w-sm p-6 mx-auto space-y-4 shadow-lg rounded-2xl">
       <CardContent className="flex flex-col items-center">
         <h2 className="mb-2 text-xl font-semibold capitalize">
-          {mode === 'stopwatch' ? 'Stopwatch' : `Pomodoro - ${pomodoroPhase}`}
+          {currentGoal.name}
         </h2>
+        <p className="text-sm text-muted-foreground">
+          Target BPM: {currentGoal.targetBpm}
+        </p>
 
-        <div className="my-4 font-mono text-5xl">
-          {formatTime(displayTime)}
-        </div>
-
-        <div className="flex gap-2">
-          <Button onClick={() => setRunning((r) => !r)}>
-            {running ? <Pause /> : <Play />}
-          </Button>
-          <Button variant="secondary" onClick={handleReset}>
-            Reset
-          </Button>
-        </div>
-
-        <Button
-          variant="link"
-          className="mt-4 text-sm"
-          onClick={() => {
-            setMode(mode === 'pomodoro' ? 'stopwatch' : 'pomodoro');
-            setTime(0);
-            setRunning(false);
-          }}
-        >
-          Switch to {mode === 'pomodoro' ? 'Stopwatch' : 'Pomodoro'}
-        </Button>
+        <Timer 
+          autoStart={!!initialGoal}
+          onReset={() => setPracticeTime(0)}
+          isPracticeTimer={true}
+          initialTime={practiceTime}
+          onTimeUpdate={setPracticeTime}
+        />
 
         <div className="flex flex-col items-center w-full gap-2 mt-6">
           <div className="flex items-center w-full gap-2">
@@ -150,6 +130,15 @@ export default function PracticeTimer() {
             />
           </div>
         </div>
+
+        <Button 
+          onClick={handleFinishSession}
+          className="w-full mt-4"
+          variant="secondary"
+          disabled={practiceTime === 0}
+        >
+          Finish Session
+        </Button>
 
         {!audioLoaded && (
           <p className="mt-2 text-sm text-yellow-600">Loading sound...</p>

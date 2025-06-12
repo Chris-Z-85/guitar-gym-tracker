@@ -1,8 +1,9 @@
-import { Home, Timer, History, Menu } from "lucide-react"
+import { Home, Timer, ScrollText, History, Menu, Settings as SettingsIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Link, useLocation } from "react-router-dom"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const menuItems = [
   {
@@ -16,9 +17,19 @@ const menuItems = [
     href: "/timer",
   },
   {
+    title: "Logger",
+    icon: <ScrollText className="w-4 h-4" />,
+    href: "/logger",
+  },
+  {
     title: "History",
     icon: <History className="w-4 h-4" />,
     href: "/history",
+  },
+  {
+    title: "Settings",
+    icon: <SettingsIcon className="w-4 h-4" />,
+    href: "/settings",
   },
 ]
 
@@ -45,7 +56,7 @@ export function Sidebar() {
         </Button>
       </div>
 
-      <nav className="space-y-2">
+      <nav className="flex-1 space-y-2">
         {menuItems.map((item) => (
           <Link
             key={item.href}
@@ -60,6 +71,13 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
+
+      <div className={cn(
+        "flex items-center pt-4 border-t",
+        collapsed ? "justify-center" : "justify-start px-3"
+      )}>
+        <ThemeToggle />
+      </div>
     </div>
   )
 } 

@@ -13,11 +13,11 @@ interface PracticeExercise {
   notes?: string;
 }
 
-const SessionForm: React.FC = () => {
+const SessionLogger: React.FC = () => {
   const [exercises, setExercises] = useState<PracticeExercise[]>([]);
   const [current, setCurrent] = useState<PracticeExercise>({ 
     name: "",
-    bpm: 80,
+    bpm: 120,
     duration: 25,
     notes: "",
   });
@@ -105,4 +105,4 @@ const SessionForm: React.FC = () => {
   );
 };
 
-export default SessionForm;
+export default SessionLogger;

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 interface PracticeExercise {
   name: string;
   bpm: number;
-  duration: number;
+  duration: number;  // duration in seconds
   notes?: string;
 }
 
@@ -20,6 +20,14 @@ const SessionHistory: React.FC = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const formatDuration = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return remainingSeconds > 0 
+      ? `${minutes}m ${remainingSeconds}s`
+      : `${minutes}m`;
+  };
 
   // Load sessions from Supabase on component mount
   useEffect(() => {
@@ -78,7 +86,7 @@ const SessionHistory: React.FC = () => {
                 <ul className="mt-2 space-y-2">
                   {session.exercises.map((exercise, idx) => (
                     <li key={idx} className="text-sm">
-                      {exercise.name} — {exercise.bpm} BPM — {exercise.duration} min
+                      {exercise.name} — {exercise.bpm} BPM — {formatDuration(exercise.duration)}
                       {exercise.notes && (
                         <p className="mt-1 text-gray-500">Notes: {exercise.notes}</p>
                       )}
