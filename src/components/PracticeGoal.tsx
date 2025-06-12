@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@radix-ui/react-label"
 import { Textarea } from "./ui/textarea"
-import { useUser } from "@/lib/hooks/useUser"
+import { useAuth } from "@/lib/context/AuthProvider"
 import { PracticeItem, fetchPracticeItems } from "@/lib/practice-items"
 import { toast } from "sonner"
+import { useNavigate, useLocation } from "react-router-dom"
 
 export interface PracticeGoal {
   name: string
@@ -19,7 +20,9 @@ interface PracticeGoalFormProps {
 }
 
 export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
-  const { user } = useUser();
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [goal, setGoal] = useState<PracticeGoal>({
     name: "",
     targetBpm: 120,
@@ -29,29 +32,53 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (!user) return;
+    // Only fetch practice items if user is logged in
+    if (!user) return
 
     const loadPracticeItems = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const items = await fetchPracticeItems(user.id);
-        setPracticeItems(items);
+        const items = await fetchPracticeItems(user.id)
+        setPracticeItems(items)
       } catch (error) {
-        toast.error("Failed to load practice items");
-        console.error(error);
+        toast.error("Failed to load practice items")
+        console.error(error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    loadPracticeItems();
-  }, [user]);
+    loadPracticeItems()
+  }, [user])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!goal.name) return
+
+    if (!user) {
+      // Save the current goal in session storage before redirecting
+      sessionStorage.setItem('pendingGoal', JSON.stringify(goal))
+      // Redirect to auth with current location as return destination
+      navigate('/auth', { state: { from: location } })
+      return
+    }
+
     onGoalSet(goal)
   }
+
+  // Try to restore pending goal when user returns after authentication
+  useEffect(() => {
+    if (user) {
+      const pendingGoal = sessionStorage.getItem('pendingGoal')
+      if (pendingGoal) {
+        const savedGoal = JSON.parse(pendingGoal)
+        setGoal(savedGoal)
+        sessionStorage.removeItem('pendingGoal')
+        // Automatically submit the form if we have a saved goal
+        onGoalSet(savedGoal)
+      }
+    }
+  }, [user, onGoalSet])
 
   return (
     <Card>
@@ -59,20 +86,22 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">What are you practicing?</Label>
-            <div className="flex flex-wrap gap-2">
-              {practiceItems.map(item => (
-                <Button 
-                  key={item.id}
-                  type="button" 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setGoal(prev => ({ ...prev, name: item.name }))}
-                  disabled={isLoading}
-                >
-                  {item.name}
-                </Button>
-              ))}
-            </div>
+            {user && practiceItems.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {practiceItems.map(item => (
+                  <Button 
+                    key={item.id}
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setGoal(prev => ({ ...prev, name: item.name }))}
+                    disabled={isLoading}
+                  >
+                    {item.name}
+                  </Button>
+                ))}
+              </div>
+            )}
             <Input
               id="name"
               value={goal.name}
