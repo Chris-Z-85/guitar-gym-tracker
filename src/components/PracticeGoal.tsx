@@ -2,12 +2,13 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@radix-ui/react-label"
 import { Textarea } from "./ui/textarea"
 import { useAuth } from "@/lib/context/AuthProvider"
 import { PracticeItem, fetchPracticeItems } from "@/lib/practice-items"
 import { toast } from "sonner"
 import { useNavigate, useLocation } from "react-router-dom"
+import { Sparkles, StickyNote } from "lucide-react"
+import { BpmSelector } from "./BpmSelector"
 
 export interface PracticeGoal {
   name: string
@@ -85,7 +86,9 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">What are you practicing?</Label>
+            <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-white">
+              <Sparkles size={18} />Practice Details
+            </h2>
             {user && practiceItems.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {practiceItems.map(item => (
@@ -111,20 +114,15 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
             />
           </div>
           
-          <div>
-            <Label htmlFor="targetBpm">Target BPM</Label>
-            <Input
-              id="targetBpm"
-              type="number"
-              value={goal.targetBpm}
-              onChange={(e) => setGoal({ ...goal, targetBpm: Number(e.target.value) })}
-              min={1}
-              required
-            />
-          </div>
+          <BpmSelector
+            value={goal.targetBpm}
+            onChange={(value) => setGoal(prev => ({ ...prev, targetBpm: value }))}
+          />
 
           <div>
-            <Label htmlFor="notes">Notes (optional)</Label>
+            <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-white">
+              <StickyNote size={18} />Notes (optional)
+            </h2>
             <Textarea
               id="notes"
               value={goal.notes}
