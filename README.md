@@ -4,6 +4,10 @@
 
 ---
 
+## 🚧 Under Construction
+
+This project is still in active development.
+
 ## 📸 Demo
 
 👉 **[Try it live here](https://guitar-gym-tracker.netlify.app/)**
