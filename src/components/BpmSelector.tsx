@@ -125,14 +125,26 @@ export function BpmSelector({ value, onChange }: BpmSelectorProps) {
       </div>
       <div className="flex justify-center gap-4">
         <Button 
-          onClick={() => onChange(Math.max(value - 1, MIN_BPM))}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            console.log('BPMSelector: - button clicked, current value:', value)
+            onChange(Math.max(value - 1, MIN_BPM))
+          }}
           variant="outline"
+          type="button"
         >
           -
         </Button>
         <Button 
-          onClick={() => onChange(Math.min(value + 1, MAX_BPM))}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            console.log('BPMSelector: + button clicked, current value:', value)
+            onChange(Math.min(value + 1, MAX_BPM))
+          }}
           variant="outline"
+          type="button"
         >
           +
         </Button>

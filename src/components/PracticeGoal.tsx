@@ -33,6 +33,8 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
   const [practiceItems, setPracticeItems] = useState<PracticeItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
+  console.log('PracticeGoal: Component rendered, goal:', goal)
+
   useEffect(() => {
     // Only fetch practice items if user is logged in
     if (!user) return
@@ -55,6 +57,7 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('PracticeGoal: Form submitted with goal:', goal)
     if (!goal.name) return
 
     if (!user) {
@@ -65,7 +68,13 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
       return
     }
 
+    console.log('PracticeGoal: Calling onGoalSet with goal:', goal)
     onGoalSet(goal)
+  }
+
+  const handlePracticeItemClick = (itemName: string) => {
+    console.log('PracticeGoal: Practice item clicked:', itemName)
+    setGoal(prev => ({ ...prev, name: itemName }))
   }
 
   // Try to restore pending goal when user returns after authentication
@@ -76,11 +85,11 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
         const savedGoal = JSON.parse(pendingGoal)
         setGoal(savedGoal)
         sessionStorage.removeItem('pendingGoal')
-        // Automatically submit the form if we have a saved goal
-        onGoalSet(savedGoal)
+        // Don't automatically submit - let user adjust BPM first
+        // onGoalSet(savedGoal) // ❌ Removed automatic submission
       }
     }
-  }, [user, onGoalSet])
+  }, [user]) // Removed onGoalSet dependency
 
   return (
     <Card>
@@ -91,19 +100,26 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
               <Sparkles size={18} />Practice Details
             </h2>
             {user && practiceItems.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {practiceItems.map(item => (
-                  <Button 
-                    key={item.id}
-                    type="button" 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setGoal(prev => ({ ...prev, name: item.name }))}
-                    disabled={isLoading}
-                  >
-                    {item.name}
-                  </Button>
-                ))}
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {practiceItems.map(item => (
+                    <Button 
+                      key={item.id}
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handlePracticeItemClick(item.name)}
+                      disabled={isLoading}
+                    >
+                      {item.name}
+                    </Button>
+                  ))}
+                </div>
+                {goal.name && (
+                  <p className="text-sm text-muted-foreground">
+                    💡 You can now adjust the BPM and add notes before starting your practice session
+                  </p>
+                )}
               </div>
             )}
             <Input
