@@ -50,26 +50,23 @@ cd guitar-gym-tracker
 
 ```bash
 npm install
-# or
-pnpm install
 ```
 
-### 3️⃣ Run locally
+### 3️⃣ Set up environment
+
+Create a .env file:
+
+```bash
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_ANON_KEY=your-supabase-key
+VITE_FIREBASE_API_KEY=your-firebase-key
+VITE_FIREBASE_PROJECT_ID=your-project-id
+```
+
+### 4️⃣ Run locally
 
 ```bash
 npm run dev
-```
-
-### 4️⃣ Build for production
-
-```bash
-npm run build
-```
-
-### 5️⃣ Preview production build
-
-```bash
-npm run preview
 ```
 
 ## ♿ Accessibility
