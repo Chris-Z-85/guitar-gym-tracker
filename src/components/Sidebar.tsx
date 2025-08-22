@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth } from "@/lib/context/AuthProvider"
-import { supabase } from "@/components/supabaseClient"
+import { logOut } from "@/components/firebaseClient"
 import { toast } from "sonner"
 
 const menuItems = [
@@ -44,7 +44,7 @@ export function Sidebar() {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut()
+      await logOut()
       toast.success("Signed out successfully")
       navigate("/")
     } catch (error) {

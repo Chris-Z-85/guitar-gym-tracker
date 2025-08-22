@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from "@/components/supabaseClient.ts";
+import { db } from "@/components/firebaseClient";
+import { collection, getDocs, deleteDoc, doc, orderBy, query, Timestamp } from "firebase/firestore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -11,9 +12,10 @@ interface PracticeExercise {
 }
 
 interface Session {
-  id: number;
+  id: string;
   date: string;
   exercises: PracticeExercise[];
+  createdAt?: Timestamp;
 }
 
 const SessionHistory: React.FC = () => {
@@ -29,7 +31,7 @@ const SessionHistory: React.FC = () => {
       : `${minutes}m`;
   };
 
-  // Load sessions from Supabase on component mount
+  // Load sessions from Firestore on component mount
   useEffect(() => {
     fetchSessions();
   }, []);
@@ -37,13 +39,10 @@ const SessionHistory: React.FC = () => {
   const fetchSessions = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('practice_sessions')
-        .select('*')
-        .order('date', { ascending: false });
-
-      if (error) throw error;
-      setSessions(data || []);
+      const q = query(collection(db, 'practice_sessions'), orderBy('date', 'desc'));
+      const snap = await getDocs(q);
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Session[];
+      setSessions(data);
     } catch (err) {
       console.error('Error fetching sessions:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
@@ -52,14 +51,9 @@ const SessionHistory: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('practice_sessions')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await deleteDoc(doc(db, 'practice_sessions', id));
       setSessions(prevSessions => prevSessions.filter(session => session.id !== id));
     } catch (err) {
       console.error('Error deleting session:', err);

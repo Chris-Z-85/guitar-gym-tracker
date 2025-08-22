@@ -1,6 +1,5 @@
-import { Auth as SupabaseAuth } from '@supabase/auth-ui-react'
-import { ThemeSupa } from '@supabase/auth-ui-shared'
-import { supabase } from '@/components/supabaseClient'
+import { Button } from '@/components/ui/button'
+import { signIn } from '@/components/firebaseClient'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAuth } from '@/lib/context/AuthProvider'
@@ -22,22 +21,7 @@ export function Auth() {
 
   return (
     <div className="max-w-sm py-8 mx-auto">
-      <SupabaseAuth
-        supabaseClient={supabase}
-        appearance={{
-          theme: ThemeSupa,
-          variables: {
-            default: {
-              colors: {
-                brand: 'var(--primary)',
-                brandAccent: 'var(--primary-foreground)',
-              },
-            },
-          },
-        }}
-        providers={[]}
-        redirectTo={`${window.location.origin}/auth/callback`}
-      />
+      <Button onClick={signIn} className="w-full">Sign in with Google</Button>
     </div>
   )
 } 

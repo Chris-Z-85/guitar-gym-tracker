@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "./ui/textarea"
 import { useAuth } from "@/lib/context/AuthProvider"
-import { PracticeItem, fetchPracticeItems } from "@/lib/practice-items"
+import { fetchPracticeItems } from "@/lib/practice-items"
+import type { PracticeItem } from "@/types/firestore"
 import { toast } from "sonner"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Sparkles, StickyNote } from "lucide-react"
@@ -39,7 +40,7 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
     const loadPracticeItems = async () => {
       setIsLoading(true)
       try {
-        const items = await fetchPracticeItems(user.id)
+        const items = await fetchPracticeItems(user.uid)
         setPracticeItems(items)
       } catch (error) {
         toast.error("Failed to load practice items")

@@ -5,14 +5,17 @@ import { Slider } from "@/components/ui/slider";
 import { Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { PracticeGoal, PracticeGoalForm } from './PracticeGoal';
-import { supabase } from "@/components/supabaseClient.ts";
+import { db } from "@/components/firebaseClient";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Timer } from './Timer';
+import { useAuth } from '@/lib/context/AuthProvider';
 
 interface PracticeTimerProps {
   initialGoal?: PracticeGoal;
 }
 
 export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
+  const { user } = useAuth();
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
@@ -53,7 +56,7 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
   };
 
   const handleFinishSession = async () => {
-    if (!currentGoal) return;
+    if (!currentGoal || !user) return;
 
     try {
       // Only save if there's actual practice time
@@ -69,21 +72,27 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
           bpm: currentGoal.targetBpm,
           duration: practiceTime,
           notes: currentGoal.notes
-        }]
+        }],
+        user_id: user.uid, // ✅ Add user_id for security rules
       };
 
-      const { error } = await supabase
-        .from('practice_sessions')
-        .insert([session]);
-
-      if (error) throw error;
+      console.log('PracticeTimer: Attempting to save session:', session);
+      console.log('PracticeTimer: Current user UID:', user.uid);
+      
+      await addDoc(collection(db, 'practice_sessions'), {
+        ...session,
+        createdAt: serverTimestamp(),
+      });
 
       toast.success("Practice session saved!");
       setCurrentGoal(null);
       setPracticeTime(0);
     } catch (error) {
-      console.error('Error saving session:', error);
-      toast.error("Failed to save session");
+      console.error('PracticeTimer: Error saving session:', error);
+      const firebaseError = error as { code?: string; message?: string };
+      console.error('PracticeTimer: Error code:', firebaseError.code);
+      console.error('PracticeTimer: Error message:', firebaseError.message);
+      toast.error(`Failed to save session: ${firebaseError.message || 'Unknown error'}`);
     }
   };
 

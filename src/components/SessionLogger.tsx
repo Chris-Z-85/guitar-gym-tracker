@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { supabase } from "@/components/supabaseClient.ts";
+import { db } from "@/components/firebaseClient";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@radix-ui/react-label";
+import { useAuth } from "@/lib/context/AuthProvider";
 
 interface PracticeExercise {
   name: string;
@@ -14,6 +16,7 @@ interface PracticeExercise {
 }
 
 const SessionLogger: React.FC = () => {
+  const { user } = useAuth();
   const [exercises, setExercises] = useState<PracticeExercise[]>([]);
   const [current, setCurrent] = useState<PracticeExercise>({ 
     name: "",
@@ -34,24 +37,32 @@ const SessionLogger: React.FC = () => {
   }
 
   async function saveSession() {
+    if (!user) {
+      alert("Please sign in to save sessions");
+      return;
+    }
+
     try {
       setIsSaving(true);
       const session = {
         date: new Date().toISOString(),
         exercises,
+        createdAt: serverTimestamp(),
+        user_id: user.uid, // ✅ Add user_id for security rules
       };
 
-      const { error } = await supabase
-        .from('practice_sessions')
-        .insert([session]);
-
-      if (error) throw error;
+      console.log('Attempting to save session:', session);
+      const docRef = await addDoc(collection(db, 'practice_sessions'), session);
+      console.log('Session saved successfully with ID:', docRef.id);
 
       setExercises([]);
       alert("Session saved successfully!");
     } catch (error) {
-      console.error('Error saving session:', error);
-      alert("Failed to save session. Please try again.");
+      console.error('Detailed error saving session:', error);
+      const firebaseError = error as { code?: string; message?: string };
+      console.error('Error code:', firebaseError.code);
+      console.error('Error message:', firebaseError.message);
+      alert(`Failed to save session: ${firebaseError.message || 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }

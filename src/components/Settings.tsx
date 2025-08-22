@@ -6,7 +6,8 @@ import { Label } from "@radix-ui/react-label";
 import { Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from '@/lib/context/AuthProvider';
-import { PracticeItem, fetchPracticeItems, addPracticeItem, deletePracticeItem } from '@/lib/practice-items';
+import { fetchPracticeItems, addPracticeItem, deletePracticeItem } from '@/lib/practice-items';
+import type { PracticeItem } from '@/types/firestore';
 
 export function Settings() {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export function Settings() {
     
     const loadPracticeItems = async () => {
       try {
-        const items = await fetchPracticeItems(user.id);
+        const items = await fetchPracticeItems(user.uid);
         setPracticeItems(items);
       } catch (error) {
         toast.error("Failed to load practice items");
@@ -37,7 +38,7 @@ export function Settings() {
     try {
       const item = await addPracticeItem({
         name: newItem.trim(),
-        user_id: user.id
+        user_id: user.uid
       });
       setPracticeItems(prev => [...prev, item]);
       setNewItem("");

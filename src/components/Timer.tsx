@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw, SkipForward } from "lucide-react";
@@ -38,32 +38,7 @@ export function Timer({
   const LONG_BREAK_TIME = 15 * 60; // 15 minutes
   const CYCLES_BEFORE_LONG_BREAK = 4;
 
-  useEffect(() => {
-    if (running) {
-      timerRef.current = setInterval(() => {
-        setTime((prev) => {
-          const newTime = isPracticeTimer ? prev + 1 : prev - 1;
-          if (!isPracticeTimer && prev <= 1) {
-            handlePeriodComplete();
-            return 0;
-          }
-          onTick?.();
-          return newTime;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timerRef.current!);
-  }, [running, mode, isPracticeTimer]);
-
-  useEffect(() => {
-    onStartStop?.(running);
-  }, [running, onStartStop]);
-
-  useEffect(() => {
-    onTimeUpdate?.(time);
-  }, [time, onTimeUpdate]);
-
-  const handlePeriodComplete = () => {
+  const handlePeriodComplete = useCallback(() => {
     if (isPracticeTimer) return;
     
     const audio = new Audio('/bell.mp3');
@@ -86,7 +61,32 @@ export function Timer({
       setMode('work');
       toast.success("Back to work!");
     }
-  };
+  }, [isPracticeTimer, mode, cycles, LONG_BREAK_TIME, BREAK_TIME, WORK_TIME]);
+
+  useEffect(() => {
+    if (running) {
+      timerRef.current = setInterval(() => {
+        setTime((prev) => {
+          const newTime = isPracticeTimer ? prev + 1 : prev - 1;
+          if (!isPracticeTimer && prev <= 1) {
+            handlePeriodComplete();
+            return 0;
+          }
+          onTick?.();
+          return newTime;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timerRef.current!);
+  }, [running, mode, isPracticeTimer, handlePeriodComplete, onTick]);
+
+  useEffect(() => {
+    onStartStop?.(running);
+  }, [running, onStartStop]);
+
+  useEffect(() => {
+    onTimeUpdate?.(time);
+  }, [time, onTimeUpdate]);
 
   const handleSkip = () => {
     if (isPracticeTimer) return;
