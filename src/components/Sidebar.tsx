@@ -1,6 +1,6 @@
 import { Home, Timer, ScrollText, History, Menu, Settings as SettingsIcon, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -42,6 +42,26 @@ export function Sidebar() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  // Auto-collapse sidebar on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) { // md breakpoint
+        setIsCollapsed(true)
+      } else {
+        setIsCollapsed(false)
+      }
+    }
+
+    // Set initial state
+    handleResize()
+
+    // Add event listener
+    window.addEventListener('resize', handleResize)
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const handleSignOut = async () => {
     try {
       await logOut()
@@ -55,10 +75,10 @@ export function Sidebar() {
 
   return (
     <div
-      className={cn(
-        "relative border-r bg-card min-h-screen transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-16" : "w-64"
-      )}
+              className={cn(
+          "relative border-r bg-card min-h-screen transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-16" : "w-64"
+        )}
     >
       <div className="flex flex-col min-h-screen">
         <div className="flex items-center h-16 px-4 border-b">

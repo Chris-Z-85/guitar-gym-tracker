@@ -89,7 +89,7 @@ export function BpmSelector({ value, onChange }: BpmSelectorProps) {
 
   return (
     <div>
-      <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-white">
+      <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-foreground">
         <Target size={18} /> Target BPM
       </h2>
       <div className="relative w-full mb-4 h-44">
@@ -119,7 +119,7 @@ export function BpmSelector({ value, onChange }: BpmSelectorProps) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="font-extrabold text-white text-7xl drop-shadow-md">{value}</span>
+          <span className="font-extrabold text-foreground text-7xl drop-shadow-md">{value}</span>
           <span className="text-base tracking-widest text-gray-400">BPM</span>
         </div>
       </div>

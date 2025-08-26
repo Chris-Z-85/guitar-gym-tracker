@@ -96,7 +96,7 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-white">
+            <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-foreground">
               <Sparkles size={18} />Practice Details
             </h2>
             {user && practiceItems.length > 0 && (
@@ -137,7 +137,7 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
           />
 
           <div>
-            <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-white">
+            <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-foreground">
               <StickyNote size={18} />Notes (optional)
             </h2>
             <Textarea
