@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Volume2, VolumeX } from "lucide-react";
-import { toast } from "sonner";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Volume2, VolumeX } from 'lucide-react';
+import { toast } from 'sonner';
 import { PracticeGoal, PracticeGoalForm } from './PracticeGoal';
-import { db } from "@/components/firebaseClient";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from '@/components/firebaseClient';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { Timer } from './Timer';
 import { useAuth } from '@/lib/context/AuthProvider';
 
@@ -19,7 +19,9 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
-  const [currentGoal, setCurrentGoal] = useState<PracticeGoal | null>(initialGoal || null);
+  const [currentGoal, setCurrentGoal] = useState<PracticeGoal | null>(
+    initialGoal || null
+  );
   const [practiceTime, setPracticeTime] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -28,13 +30,13 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
     const audio = new Audio();
     audio.src = '/bell.mp3';
     audio.preload = 'auto';
-    
+
     audio.addEventListener('canplaythrough', () => {
       setAudioLoaded(true);
       audioRef.current = audio;
     });
 
-    audio.addEventListener('error', (e) => {
+    audio.addEventListener('error', e => {
       console.error('Error loading audio:', e);
     });
 
@@ -61,30 +63,32 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
     try {
       // Only save if there's actual practice time
       if (practiceTime === 0) {
-        toast.error("Practice duration must be greater than 0 seconds");
+        toast.error('Practice duration must be greater than 0 seconds');
         return;
       }
 
       const session = {
         date: new Date().toISOString(),
-        exercises: [{
-          name: currentGoal.name,
-          bpm: currentGoal.targetBpm,
-          duration: practiceTime,
-          notes: currentGoal.notes
-        }],
+        exercises: [
+          {
+            name: currentGoal.name,
+            bpm: currentGoal.targetBpm,
+            duration: practiceTime,
+            notes: currentGoal.notes,
+          },
+        ],
         user_id: user.uid, // ✅ Add user_id for security rules
       };
 
       console.log('PracticeTimer: Attempting to save session:', session);
       console.log('PracticeTimer: Current user UID:', user.uid);
-      
+
       await addDoc(collection(db, 'practice_sessions'), {
         ...session,
         createdAt: serverTimestamp(),
       });
 
-      toast.success("Practice session saved!");
+      toast.success('Practice session saved!');
       setCurrentGoal(null);
       setPracticeTime(0);
     } catch (error) {
@@ -92,7 +96,9 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
       const firebaseError = error as { code?: string; message?: string };
       console.error('PracticeTimer: Error code:', firebaseError.code);
       console.error('PracticeTimer: Error message:', firebaseError.message);
-      toast.error(`Failed to save session: ${firebaseError.message || 'Unknown error'}`);
+      toast.error(
+        `Failed to save session: ${firebaseError.message || 'Unknown error'}`
+      );
     }
   };
 
@@ -110,7 +116,7 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
           Target BPM: {currentGoal.targetBpm}
         </p>
 
-        <Timer 
+        <Timer
           autoStart={!!initialGoal}
           onReset={() => setPracticeTime(0)}
           isPracticeTimer={true}
@@ -125,7 +131,11 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
               size="icon"
               onClick={() => setMuted(!muted)}
             >
-              {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              {muted ? (
+                <VolumeX className="w-5 h-5" />
+              ) : (
+                <Volume2 className="w-5 h-5" />
+              )}
             </Button>
             <Slider
               className="w-full"
@@ -140,7 +150,7 @@ export default function PracticeTimer({ initialGoal }: PracticeTimerProps) {
           </div>
         </div>
 
-        <Button 
+        <Button
           onClick={handleFinishSession}
           className="w-full mt-4"
           variant="secondary"

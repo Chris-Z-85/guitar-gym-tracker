@@ -74,6 +74,26 @@ VITE_FIREBASE_APP_ID=your-firebase-project-id
 npm run dev
 ```
 
+### 5️⃣ Code Formatting
+
+This project uses Prettier for automatic code formatting. The formatting will be applied automatically when you save files in VS Code/Cursor.
+
+**Manual formatting:**
+
+```bash
+# Format all files
+npm run format
+
+# Check formatting without changing files
+npm run format:check
+```
+
+**VS Code/Cursor Setup:**
+
+- Install the Prettier extension
+- Format on save is enabled by default
+- The project includes `.vscode/settings.json` for optimal configuration
+
 ## ♿ Accessibility
 
 Semantic HTML tags

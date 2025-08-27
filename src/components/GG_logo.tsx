@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 type Props = {
   className?: string;
@@ -10,12 +10,12 @@ type Props = {
 };
 
 const GG_Logo: React.FC<Props> = ({
-    className = "w-16 h-16",
-  title = "Guitar Gym Logo",
-  foreground = "var(--foreground)",
-  background = "var(--background)",
-  role = "img",
-  ariaLabel = "Guitar Gym logo",
+  className = 'w-16 h-16',
+  title = 'Guitar Gym Logo',
+  foreground = 'var(--foreground)',
+  background = 'var(--background)',
+  role = 'img',
+  ariaLabel = 'Guitar Gym logo',
 }) => {
   return (
     <svg

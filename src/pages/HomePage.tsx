@@ -1,7 +1,7 @@
-import { PracticeGoalForm, PracticeGoal } from "@/components/PracticeGoal"
-import { useState } from "react"
-import PracticeTimer from "@/components/PracticeTimer"
-import GG_logo from "@/components/GG_logo";
+import { PracticeGoalForm, PracticeGoal } from '@/components/PracticeGoal';
+import { useState } from 'react';
+import PracticeTimer from '@/components/PracticeTimer';
+import GG_logo from '@/components/GG_logo';
 
 export default function HomePage() {
   const [currentGoal, setCurrentGoal] = useState<PracticeGoal | null>(null);
@@ -20,9 +20,12 @@ export default function HomePage() {
             <h1>GYM</h1>
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground sm:text-3xl lg:text-2xl">Practice Tracker</h1>
+            <h1 className="text-2xl font-bold text-foreground sm:text-3xl lg:text-2xl">
+              Practice Tracker
+            </h1>
             <p className="text-base">
-              Track your daily guitar practice sessions, add exercises, and monitor your progress over time.
+              Track your daily guitar practice sessions, add exercises, and
+              monitor your progress over time.
             </p>
           </div>
         </div>
@@ -32,9 +35,9 @@ export default function HomePage() {
             <PracticeTimer initialGoal={currentGoal} />
           </>
         ) : (
-          <PracticeGoalForm onGoalSet={handleGoalSet}/>
+          <PracticeGoalForm onGoalSet={handleGoalSet} />
         )}
       </div>
     </div>
-  )
-} 
+  );
+}

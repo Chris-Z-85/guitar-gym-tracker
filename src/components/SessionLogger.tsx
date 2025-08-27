@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { db } from "@/components/firebaseClient";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@radix-ui/react-label";
-import { useAuth } from "@/lib/context/AuthProvider";
+import { useState } from 'react';
+import { db } from '@/components/firebaseClient';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@radix-ui/react-label';
+import { useAuth } from '@/lib/context/AuthProvider';
 
 interface PracticeExercise {
   name: string;
@@ -18,27 +18,32 @@ interface PracticeExercise {
 const SessionLogger: React.FC = () => {
   const { user } = useAuth();
   const [exercises, setExercises] = useState<PracticeExercise[]>([]);
-  const [current, setCurrent] = useState<PracticeExercise>({ 
-    name: "",
+  const [current, setCurrent] = useState<PracticeExercise>({
+    name: '',
     bpm: 120,
     duration: 25,
-    notes: "",
+    notes: '',
   });
   const [isSaving, setIsSaving] = useState(false);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
     const { name, value } = e.target;
-    setCurrent({ ...current, [name]: name === "bpm" || name === "duration" ? +value : value });
+    setCurrent({
+      ...current,
+      [name]: name === 'bpm' || name === 'duration' ? +value : value,
+    });
   }
 
   function addExercise() {
     setExercises([...exercises, current]);
-    setCurrent({ name: "", bpm: 80, duration: 25, notes: "" });
+    setCurrent({ name: '', bpm: 80, duration: 25, notes: '' });
   }
 
   async function saveSession() {
     if (!user) {
-      alert("Please sign in to save sessions");
+      alert('Please sign in to save sessions');
       return;
     }
 
@@ -56,13 +61,15 @@ const SessionLogger: React.FC = () => {
       console.log('Session saved successfully with ID:', docRef.id);
 
       setExercises([]);
-      alert("Session saved successfully!");
+      alert('Session saved successfully!');
     } catch (error) {
       console.error('Detailed error saving session:', error);
       const firebaseError = error as { code?: string; message?: string };
       console.error('Error code:', firebaseError.code);
       console.error('Error message:', firebaseError.message);
-      alert(`Failed to save session: ${firebaseError.message || 'Unknown error'}`);
+      alert(
+        `Failed to save session: ${firebaseError.message || 'Unknown error'}`
+      );
     } finally {
       setIsSaving(false);
     }
@@ -74,22 +81,45 @@ const SessionLogger: React.FC = () => {
         <h2 className="text-xl font-bold">Log Practice Session</h2>
         <div>
           <Label>Exercise name</Label>
-          <Input placeholder="Exercise" name="name" value={current.name} onChange={handleChange} />
+          <Input
+            placeholder="Exercise"
+            name="name"
+            value={current.name}
+            onChange={handleChange}
+          />
         </div>
         <div>
           <Label>BPM</Label>
-          <Input type="number" placeholder="BPM" name="bpm" value={current.bpm} onChange={handleChange} />
+          <Input
+            type="number"
+            placeholder="BPM"
+            name="bpm"
+            value={current.bpm}
+            onChange={handleChange}
+          />
         </div>
         <div>
           <Label>Minutes practiced</Label>
-          <Input type="number" placeholder="Minutes practiced" name="duration" value={current.duration} onChange={handleChange} />
+          <Input
+            type="number"
+            placeholder="Minutes practiced"
+            name="duration"
+            value={current.duration}
+            onChange={handleChange}
+          />
         </div>
         <div>
           <Label>Notes (optional)</Label>
-          <Textarea name="notes" value={current.notes} onChange={handleChange} />
+          <Textarea
+            name="notes"
+            value={current.notes}
+            onChange={handleChange}
+          />
         </div>
 
-        <Button onClick={addExercise} className="w-full">Add Exercise</Button>
+        <Button onClick={addExercise} className="w-full">
+          Add Exercise
+        </Button>
 
         {exercises.length > 0 && (
           <div className="space-y-2">
@@ -101,13 +131,13 @@ const SessionLogger: React.FC = () => {
                 </li>
               ))}
             </ul>
-            <Button 
-              variant="secondary" 
-              onClick={saveSession} 
+            <Button
+              variant="secondary"
+              onClick={saveSession}
               className="w-full"
               disabled={isSaving}
             >
-              {isSaving ? "Saving..." : "✅ Save Session"}
+              {isSaving ? 'Saving...' : '✅ Save Session'}
             </Button>
           </div>
         )}

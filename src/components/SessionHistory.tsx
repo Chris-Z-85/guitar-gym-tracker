@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { db } from "@/components/firebaseClient";
-import { collection, getDocs, deleteDoc, doc, orderBy, query, Timestamp } from "firebase/firestore";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { db } from '@/components/firebaseClient';
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  orderBy,
+  query,
+  Timestamp,
+} from 'firebase/firestore';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface PracticeExercise {
   name: string;
   bpm: number;
-  duration: number;  // duration in seconds
+  duration: number; // duration in seconds
   notes?: string;
 }
 
@@ -26,7 +34,7 @@ const SessionHistory: React.FC = () => {
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return remainingSeconds > 0 
+    return remainingSeconds > 0
       ? `${minutes}m ${remainingSeconds}s`
       : `${minutes}m`;
   };
@@ -39,7 +47,10 @@ const SessionHistory: React.FC = () => {
   const fetchSessions = async () => {
     try {
       setLoading(true);
-      const q = query(collection(db, 'practice_sessions'), orderBy('date', 'desc'));
+      const q = query(
+        collection(db, 'practice_sessions'),
+        orderBy('date', 'desc')
+      );
       const snap = await getDocs(q);
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() })) as Session[];
       setSessions(data);
@@ -54,7 +65,9 @@ const SessionHistory: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'practice_sessions', id));
-      setSessions(prevSessions => prevSessions.filter(session => session.id !== id));
+      setSessions(prevSessions =>
+        prevSessions.filter(session => session.id !== id)
+      );
     } catch (err) {
       console.error('Error deleting session:', err);
       alert('Failed to delete session. Please try again.');
@@ -80,9 +93,12 @@ const SessionHistory: React.FC = () => {
                 <ul className="mt-2 space-y-2">
                   {session.exercises.map((exercise, idx) => (
                     <li key={idx} className="text-sm">
-                      {exercise.name} — {exercise.bpm} BPM — {formatDuration(exercise.duration)}
+                      {exercise.name} — {exercise.bpm} BPM —{' '}
+                      {formatDuration(exercise.duration)}
                       {exercise.notes && (
-                        <p className="mt-1 text-gray-500">Notes: {exercise.notes}</p>
+                        <p className="mt-1 text-gray-500">
+                          Notes: {exercise.notes}
+                        </p>
                       )}
                     </li>
                   ))}

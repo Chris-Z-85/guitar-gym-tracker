@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, SkipForward } from "lucide-react";
-import { toast } from "sonner";
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Play, Pause, RotateCcw, SkipForward } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface TimerProps {
   onTick?: () => void;
@@ -17,17 +17,19 @@ interface TimerProps {
 
 type TimerMode = 'work' | 'break';
 
-export function Timer({ 
-  onTick, 
-  className = "", 
-  autoStart = false, 
-  onReset, 
+export function Timer({
+  onTick,
+  className = '',
+  autoStart = false,
+  onReset,
   onStartStop,
   initialTime,
   isPracticeTimer = false,
-  onTimeUpdate
+  onTimeUpdate,
 }: TimerProps) {
-  const [time, setTime] = useState(initialTime ?? (isPracticeTimer ? 0 : 25 * 60));
+  const [time, setTime] = useState(
+    initialTime ?? (isPracticeTimer ? 0 : 25 * 60)
+  );
   const [running, setRunning] = useState(autoStart);
   const [mode, setMode] = useState<TimerMode>('work');
   const [cycles, setCycles] = useState(0);
@@ -40,33 +42,33 @@ export function Timer({
 
   const handlePeriodComplete = useCallback(() => {
     if (isPracticeTimer) return;
-    
+
     const audio = new Audio('/bell.mp3');
     audio.play();
-    
+
     if (mode === 'work') {
       const completedCycles = cycles + 1;
       setCycles(completedCycles);
-      
+
       if (completedCycles % CYCLES_BEFORE_LONG_BREAK === 0) {
         setTime(LONG_BREAK_TIME);
-        toast.success("Time for a long break!");
+        toast.success('Time for a long break!');
       } else {
         setTime(BREAK_TIME);
-        toast.success("Time for a break!");
+        toast.success('Time for a break!');
       }
       setMode('break');
     } else {
       setTime(WORK_TIME);
       setMode('work');
-      toast.success("Back to work!");
+      toast.success('Back to work!');
     }
   }, [isPracticeTimer, mode, cycles, LONG_BREAK_TIME, BREAK_TIME, WORK_TIME]);
 
   useEffect(() => {
     if (running) {
       timerRef.current = setInterval(() => {
-        setTime((prev) => {
+        setTime(prev => {
           const newTime = isPracticeTimer ? prev + 1 : prev - 1;
           if (!isPracticeTimer && prev <= 1) {
             handlePeriodComplete();
@@ -119,20 +121,22 @@ export function Timer({
             <div className="mb-4 text-lg font-semibold">
               {mode === 'work' ? 'Focus Time' : 'Break Time'}
             </div>
-            
+
             <div className="mb-2 text-sm text-muted-foreground">
               Cycle: {Math.floor(cycles / 2) + 1}
             </div>
           </>
         )}
 
-        <div className="my-4 font-mono text-5xl">
-          {formatTime(time)}
-        </div>
+        <div className="my-4 font-mono text-5xl">{formatTime(time)}</div>
 
         <div className="flex gap-2">
-          <Button onClick={() => setRunning((r) => !r)}>
-            {running ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          <Button onClick={() => setRunning(r => !r)}>
+            {running ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
           </Button>
           {!isPracticeTimer && (
             <Button variant="outline" onClick={handleSkip}>
@@ -146,12 +150,12 @@ export function Timer({
 
         {!isPracticeTimer && (
           <div className="mt-4 text-sm text-center text-muted-foreground">
-            {mode === 'work' 
-              ? "Stay focused! Take a break when the timer ends." 
-              : "Time to recharge! Next session starts soon."}
+            {mode === 'work'
+              ? 'Stay focused! Take a break when the timer ends.'
+              : 'Time to recharge! Next session starts soon.'}
           </div>
         )}
       </CardContent>
     </Card>
   );
-} 
+}

@@ -1,15 +1,15 @@
-import { FC } from "react"
-import { Toaster } from "sonner"
-import { Sidebar } from "@/components/Sidebar"
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import HomePage from "@/pages/HomePage"
-import HistoryPage from "@/pages/HistoryPage"
-import { Timer } from "./components/Timer"
-import SessionLogger from "./components/SessionLogger"
-import { Settings } from "./components/Settings"
-import { Auth } from "./components/Auth"
-import { AuthProvider } from "./lib/context/AuthProvider"
-import { ProtectedRoute } from "./components/ProtectedRoute"
+import { FC } from 'react';
+import { Toaster } from 'sonner';
+import { Sidebar } from '@/components/Sidebar';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import HomePage from '@/pages/HomePage';
+import HistoryPage from '@/pages/HistoryPage';
+import { Timer } from './components/Timer';
+import SessionLogger from './components/SessionLogger';
+import { Settings } from './components/Settings';
+import { Auth } from './components/Auth';
+import { AuthProvider } from './lib/context/AuthProvider';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 const App: FC = () => {
   return (
@@ -61,7 +61,7 @@ const App: FC = () => {
         </div>
       </Router>
     </AuthProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;
