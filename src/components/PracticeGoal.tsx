@@ -94,6 +94,15 @@ export function PracticeGoalForm({ onGoalSet }: PracticeGoalFormProps) {
   return (
     <Card>
       <CardContent className="pt-6">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground sm:text-3xl lg:text-2xl">
+            Practice Tracker
+          </h1>
+          <p className="text-base">
+            Track your daily guitar practice sessions, add exercises, and
+            monitor your progress over time.
+          </p>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <h2 className="flex items-center gap-2 mb-2 text-lg font-semibold text-foreground">

@@ -86,7 +86,7 @@ export function Sidebar() {
     <div
       className={cn(
         'relative border-r bg-card min-h-screen transition-all duration-300 ease-in-out',
-        isCollapsed ? 'w-16' : 'w-64'
+        isCollapsed ? 'w-20' : 'w-64'
       )}
     >
       <div className="flex flex-col min-h-screen">
