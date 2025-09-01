@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { Toaster } from 'sonner';
 import { Sidebar } from '@/components/Sidebar';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -10,14 +10,32 @@ import { Settings } from './components/Settings';
 import { Auth } from './components/Auth';
 import { AuthProvider } from './lib/context/AuthProvider';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { cn } from '@/lib/utils';
 
 const App: FC = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
         <div className="flex min-h-screen bg-background">
           <Sidebar />
-          <div className="flex-1 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div
+            className={cn(
+              'flex-1 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8',
+              isMobile && 'w-full pt-20'
+            )}
+          >
             <div className="py-4 sm:py-6 lg:py-8">
               <Routes>
                 <Route path="/" element={<HomePage />} />
